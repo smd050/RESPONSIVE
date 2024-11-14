@@ -6,16 +6,19 @@
     <title>Camera with Controls</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 </head>
 <body>
 
     <!--Main Container Section-->
     <div class="main-container" id="mainContainer">
         
-        <!-- Left Panel for Video Capture -->
+        <!-- Left Panel for Video Capture 123 -->
         <div class="video-container" id="video-container">
             <video id="video" autoplay playsinline></video>
-            <div class="overlay">
+            <canvas></canvas>
+            <div id="overlayContent" class="overlay">
                 <div class="overlaySection1">
                     <div class="svg-container">
                     <svg width="349" height="266" viewBox="0 0 349 266" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -43,8 +46,8 @@
                 <div class="overlaySection2">
                   <svg width="349" height="236" viewBox="0 0 349 266" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
                     <div>
-                        <h5 id="leanAngle">60</h5>
-                        <input id="LeanSlider" type="range" min="0" max="120" >
+                        <h5 id="leanAngle">25°</h5>
+                        <input id="LeanSlider" type="range" min="-65" max="65" value="25" >
                     </div>
                   </div>
               

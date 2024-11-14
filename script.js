@@ -173,27 +173,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //Lean Angle Section **********************************************************************************
 
-    // Get the value of the <h5> element
-    const angleValue = document.getElementById("leanAngle").textContent;
-
-    // Get the slider element
+    // Select the leanAngle and LeanSlider elements
+// Function to update the leanSlider value based on Y-axis (gamma) orientation
+function updateLeanSlider(yAxisValue) {
     const leanSlider = document.getElementById("LeanSlider");
+    const leanAngleElement = document.getElementById("leanAngle");
 
-    // Set the slider value to the h5 value
-    leanSlider.value = angleValue;
-    leanSlider.addEventListener('input', function() {
-        angleValue.textContent = this.value; // Update the label text with the current value of the slider
-    });
+    // Map Y-axis values to slider range (0-120)
+    let sliderValue = yAxisValue;
+    console.log(yAxisValue);
+    
+
+    // Update slider and angle display
+    leanSlider.value = sliderValue;
+    leanAngleElement.textContent = `${sliderValue.toFixed(2)}°`;
+}
+
+// Check if DeviceOrientation is supported
+if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', function(event) {
+        const gamma = event.gamma || 0; // Y-axis value
+
+        // Call updateLeanSlider with the current Y-axis (gamma) value
+        updateLeanSlider(gamma);
+    }, false);
+} else {
+    document.getElementById("leanAngle").textContent = `Device orientation not supported`;
+}
 
 
-    // Function to update h5 with a random number between 0 and 180
-    function updateRandomNumber() {
-        const randomNum = Math.floor(Math.random() * 120); // Generates a random number between 0 and 180
-        angleValue.textContent = randomNum;
-    }
-
-    // Update the h5 text every 500 milliseconds (adjust as needed)
-    setInterval(updateRandomNumber, 500);
     
     document.getElementById('speedSwitch').addEventListener('change', function() {
         const overlaySection = document.querySelector('.overlaySection1');
@@ -229,59 +237,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     //SOME MORE FUNCTIONS **************************************************************************************************************
-    function updateLocation(position) {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
-        const speed = position.coords.speed; // Speed in meters per second (null if not available)
-    
-        // Displaying the latitude and longitude on the page
-        document.getElementById("longitude").textContent = `Long: ${longitude.toFixed(3)}`;
-        document.getElementById("latitude").textContent = `Lat: ${latitude.toFixed(3)}`;
-        // Displaying the speed on the page (if available)
-        if (speed !== null) {
-            document.getElementById("speed").textContent = `Speed: ${speed.toFixed(2)} m/s`;
-        } else {
-            document.getElementById("speed").textContent = "Speed: Not available";
-        }
-    }
-    
-    function errorHandler(error) {
-        document.getElementById("longitude").textContent = "Long:";
-        document.getElementById("speed").textContent = "Speed: Not available";
-    }
-    
-    // Check if geolocation is supported
+    // Function to update geolocation data
+function updateLocation(position) {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    const speed = position.coords.speed || 0; // Speed may be null if unavailable
+
+    document.getElementById("longitude").textContent = `Long: ${longitude.toFixed(3)}`;
+    document.getElementById("latitude").textContent = `Lat: ${latitude.toFixed(3)}`;
+    document.getElementById("speed").textContent = `${(speed * 3.6).toFixed(2)} km/h`; // Convert m/s to km/h
+}
+
+// Error handler for geolocation
+function errorHandler(error) {
+    console.error("Error accessing location:", error);
+}
+
+// Function to update motion/orientation data
+function updateMotionData(event) {
+    // Access accelerometer values from DeviceMotion event
+    const x = event.accelerationIncludingGravity.x || 0;
+    const y = event.accelerationIncludingGravity.y || 0;
+    const z = event.accelerationIncludingGravity.z || 0;
+
+    document.getElementById("Xaxis").textContent = `X: ${x.toFixed(2)}`;
+    document.getElementById("Yaxis").textContent = `Y: ${y.toFixed(2)}`;
+    document.getElementById("Zaxis").textContent = `Z: ${z.toFixed(2)}`;
+}
+
+// Mock wind data (iOS does not provide this directly)
+function updateWind() {
+    // Simulate random wind data
+    const windSpeed = (Math.random() * 100).toFixed(1);
+    document.getElementById("wind").textContent = `Wind: ${windSpeed} km/h`;
+}
+
+// Main function to request geolocation and set up motion/orientation listeners
+function startTracking() {
+    // Request geolocation updates every 2 seconds
     if (navigator.geolocation) {
-        // Use watchPosition to get continuous location updates
         navigator.geolocation.watchPosition(updateLocation, errorHandler, {
-            enableHighAccuracy: true, // Request more accurate results
-            maximumAge: 0,            // Always get the latest position
-            timeout: 5000             // Timeout after 5 seconds if no position is available
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 5000
         });
     } else {
-        document.getElementById("longitude").textContent = "Geolocation is not supported by this browser.";
-        document.getElementById("speed").textContent = "Speed: Not available";
+        document.getElementById("longitude").textContent = "Geolocation not supported";
     }
-    
-    // Check if DeviceOrientation is supported
-    if (window.DeviceOrientationEvent) {
-        window.addEventListener('deviceorientation', function(event) {
-            const alpha = event.alpha || 0; // Rotation around z-axis
-            const beta = event.beta || 0;   // Rotation around x-axis
-            const gamma = event.gamma || 0; // Rotation around y-axis
-    
-            // Displaying the orientation data in XYZ format
-            document.getElementById("Xaxis").textContent = `X: ${beta.toFixed(2)}`;
-            document.getElementById("Yaxis").textContent = `Y: ${gamma.toFixed(2)}`;
-            document.getElementById("Zaxis").textContent = `Z: ${alpha.toFixed(2)}`;
 
-
-        }, false);
+    // Request motion sensor updates every 2 seconds
+    if (window.DeviceMotionEvent) {
+        window.addEventListener("devicemotion", updateMotionData);
     } else {
-        document.getElementById("Xaxis").textContent = `...`;
-            document.getElementById("Yaxis").textContent = `...`;
-            document.getElementById("Zaxis").textContent = `...`;
+        console.error("DeviceMotionEvent is not supported on this device.");
     }
+
+    // Set an interval to update mock wind data every 2 seconds
+    setInterval(updateWind, 2000);
+}
+
+// Start tracking on page load
+window.onload = startTracking;
+
     
 
 });
