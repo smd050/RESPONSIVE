@@ -239,7 +239,6 @@ if (window.DeviceOrientationEvent) {
     //SOME MORE FUNCTIONS **************************************************************************************************************
     // Function to request permissions and start tracking
 function startTracking() {
-    // Check if permission is required (mainly for iOS); Android may skip this part
     if (typeof DeviceMotionEvent.requestPermission === "function") {
         DeviceMotionEvent.requestPermission().then((permissionState) => {
             if (permissionState === "granted") {
@@ -249,32 +248,30 @@ function startTracking() {
             }
         }).catch(console.error);
     } else {
-        initializeTracking(); // Start immediately for Android and other platforms
+        initializeTracking();
     }
 }
 
 // Function to initialize tracking of all sensors
 function initializeTracking() {
-    // Start listening for orientation, motion events, and geolocation updates
     window.addEventListener("deviceorientation", updateOrientationData);
     window.addEventListener("devicemotion", updateMotionData);
 
-    // Set geolocation and wind updates every 100 milliseconds
     setInterval(() => {
         updateGeolocation();
-        updateWindData(); // Assuming a function for wind data
-    }, 100);
+        updateWindData();
+    }, 2000);
 }
 
 // Function to update orientation data
 function updateOrientationData(event) {
-    const alpha = event.alpha || 0; // Rotation around z-axis
-    const beta = event.beta || 0;   // Rotation around x-axis
-    const gamma = event.gamma || 0; // Rotation around y-axis
+    const alpha = event.alpha || 0;
+    const beta = event.beta || 0;
+    const gamma = event.gamma || 0;
 
-    document.getElementById("Xaxis").textContent = `X: ${alpha.toFixed(2)}°`;
-    document.getElementById("Yaxis").textContent = `Y: ${beta.toFixed(2)}°`;
-    document.getElementById("Zaxis").textContent = `Z: ${gamma.toFixed(2)}°`;
+    document.getElementById("Xaxis").textContent = `X : ${alpha.toFixed(2)}°`;
+    document.getElementById("Yaxis").textContent = `Y : ${beta.toFixed(2)}°`;
+    document.getElementById("Zaxis").textContent = `Z : ${gamma.toFixed(2)}°`;
 }
 
 // Function to update motion data
@@ -313,16 +310,16 @@ function updateGeolocation() {
     }
 }
 
-// Function to simulate or retrieve wind data (placeholder for real data source)
+// Function to simulate wind data within the 0-15 km/h range
 function updateWindData() {
-    // Placeholder values for wind speed and direction, replace with real API or logic if available
-    const windSpeed = Math.random() * 10; // Random wind speed
+    const windSpeed = Math.random() * 15; // Random wind speed between 0 and 15 km/h
     const windDirection = Math.floor(Math.random() * 360); // Random wind direction in degrees
-    document.getElementById("wind").textContent = `Wind: ${windSpeed.toFixed(1)} m/s at ${windDirection}°`;
+    document.getElementById("wind").textContent = `Wind: ${windSpeed.toFixed(1)} km/h at ${windDirection}°`;
 }
 
 // Start tracking on page load
 window.onload = startTracking;
+
 
     
 
