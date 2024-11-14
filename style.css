@@ -1,20 +1,20 @@
 body {
     background-color: #444;
+    overflow: auto;
 }
 
 .container{
     display: flex;
-    width: 100%;
-    height: 100vh;
+    width: 1280px;
+    height: 720px;
 }
 
 
 /*************************************************CONTAINERS*******************************************************/
 .main-container {
     display: flex;
-    width: 100%;
-    
-    height: 100vh;
+    width: 1500px;
+    height: 730px;
     background-color: #333;
     border-radius: 7px;
     border: 3px transparent;
@@ -144,16 +144,33 @@ hr {
     position:absolute;
   }
 
-  .overlaySection{
+  .overlaySection1{
     width: 349px;
     height: 266px;
-
+    transition: opacity 0.3s ease;
   }
+
+  .overlaySection2{
+    width: 349px;
+    height: 266px;
+    transition: opacity 0.3s ease;
+  }
+
+  .overlaySection3{
+    width: 349px;
+    height: 266px;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Class to hide the contents */
+.hidden {
+    display: none; /* Hides the entire section */
+}
 
 
 
   /** this is for the floating texts inside overlay**/
-  #angle {
+  #leanAngle {
     color: white;
     font-size: 36px;
     line-height: 100%;
@@ -171,7 +188,7 @@ hr {
     left: 75%;
     transform: translate(-50%, -50%);
     position: absolute;
-    top:60%;
+    top:40%;
     z-index: 1;
   }
   
@@ -182,7 +199,7 @@ hr {
     left: 75%;
     transform: translate(-50%, -50%);
     position: absolute;
-    top:67.5%;
+    top:46%;
     z-index: 1;
   }
 
@@ -193,10 +210,42 @@ hr {
     left: 74%;
     transform: translate(-50%, -50%);
     position: absolute;
-    top:75%;
+    top:52.5%;
     z-index: 1;
   }
 
+  #Xaxis {
+    color: white;
+    font-size: 26px;
+    line-height: 100%;
+    left: 74%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top:60%;
+    z-index: 1;
+  }
+
+  #Yaxis {
+    color: white;
+    font-size: 26px;
+    line-height: 100%;
+    left: 74%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top:67.5%;
+    z-index: 1;
+  }
+
+  #Zaxis {
+    color: white;
+    font-size: 26px;
+    line-height: 100%;
+    left: 74%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top:75%;
+    z-index: 1;
+  }
   
   #speed {
     color: white;
@@ -250,6 +299,7 @@ input[type="range"] {
   -webkit-transition: .2s;
   transition: opacity .2s;
   border-radius: 5px; /* Round the edges of the slider */
+  
 }
 
 /* Style the slider thumb */
