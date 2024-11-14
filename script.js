@@ -253,16 +253,15 @@ function errorHandler(error) {
     console.error("Error accessing location:", error);
 }
 
-// Function to update motion/orientation data
-function updateMotionData(event) {
-    // Access accelerometer values from DeviceMotion event
-    const x = event.accelerationIncludingGravity.x || 0;
-    const y = event.accelerationIncludingGravity.y || 0;
-    const z = event.accelerationIncludingGravity.z || 0;
+// Function to update orientation data using DeviceOrientationEvent
+function updateOrientationData(event) {
+    const alpha = event.alpha || 0; // Rotation around z-axis (in degrees)
+    const beta = event.beta || 0;   // Rotation around x-axis (in degrees)
+    const gamma = event.gamma || 0; // Rotation around y-axis (in degrees)
 
-    document.getElementById("Xaxis").textContent = `X: ${x.toFixed(2)}`;
-    document.getElementById("Yaxis").textContent = `Y: ${y.toFixed(2)}`;
-    document.getElementById("Zaxis").textContent = `Z: ${z.toFixed(2)}`;
+    document.getElementById("Xaxis").textContent = `X (Alpha): ${alpha.toFixed(2)}°`;
+    document.getElementById("Yaxis").textContent = `Y (Beta): ${beta.toFixed(2)}°`;
+    document.getElementById("Zaxis").textContent = `Z (Gamma): ${gamma.toFixed(2)}°`;
 }
 
 // Mock wind data (iOS does not provide this directly)
@@ -272,7 +271,7 @@ function updateWind() {
     document.getElementById("wind").textContent = `Wind: ${windSpeed} km/h`;
 }
 
-// Main function to request geolocation and set up motion/orientation listeners
+// Main function to request geolocation and set up orientation listeners
 function startTracking() {
     // Request geolocation updates every 2 seconds
     if (navigator.geolocation) {
@@ -285,11 +284,11 @@ function startTracking() {
         document.getElementById("longitude").textContent = "Geolocation not supported";
     }
 
-    // Request motion sensor updates every 2 seconds
-    if (window.DeviceMotionEvent) {
-        window.addEventListener("devicemotion", updateMotionData);
+    // Request orientation data updates
+    if (window.DeviceOrientationEvent) {
+        window.addEventListener("deviceorientation", updateOrientationData);
     } else {
-        console.error("DeviceMotionEvent is not supported on this device.");
+        console.error("DeviceOrientationEvent is not supported on this device.");
     }
 
     // Set an interval to update mock wind data every 2 seconds
@@ -298,6 +297,7 @@ function startTracking() {
 
 // Start tracking on page load
 window.onload = startTracking;
+
 
     
 
