@@ -237,62 +237,80 @@ if (window.DeviceOrientationEvent) {
 
 
     //SOME MORE FUNCTIONS **************************************************************************************************************
-    // Function to update geolocation data
-function updateLocation(position) {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-    const speed = position.coords.speed || 0; // Speed may be null if unavailable
-
-    document.getElementById("longitude").textContent = `Long: ${longitude.toFixed(3)}`;
-    document.getElementById("latitude").textContent = `Lat: ${latitude.toFixed(3)}`;
-    document.getElementById("speed").textContent = `${(speed * 3.6).toFixed(2)} km/h`; // Convert m/s to km/h
+    // Function to request motion and orientation permissions
+async function requestMotionPermissions() {
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        try {
+            const response = await DeviceMotionEvent.requestPermission();
+            if (response === 'granted') {
+                console.log("Device Motion permission granted.");
+                window.addEventListener("deviceorientation", updateOrientationData);
+                window.addEventListener("devicemotion", updateMotionData);
+            } else {
+                console.warn("Device Motion permission denied.");
+            }
+        } catch (error) {
+            console.error("Error requesting Device Motion permission:", error);
+        }
+    } else {
+        // For browsers that don't require permission, just start listening
+        window.addEventListener("deviceorientation", updateOrientationData);
+        window.addEventListener("devicemotion", updateMotionData);
+    }
 }
 
-// Error handler for geolocation
-function errorHandler(error) {
-    console.error("Error accessing location:", error);
-}
-
-// Function to update orientation data using DeviceOrientationEvent
+// Function to update orientation data
 function updateOrientationData(event) {
-    const alpha = event.alpha || 0; // Rotation around z-axis (in degrees)
-    const beta = event.beta || 0;   // Rotation around x-axis (in degrees)
-    const gamma = event.gamma || 0; // Rotation around y-axis (in degrees)
+    const alpha = event.alpha || 0; // Rotation around z-axis
+    const beta = event.beta || 0;   // Rotation around x-axis
+    const gamma = event.gamma || 0; // Rotation around y-axis
 
     document.getElementById("Xaxis").textContent = `X (Alpha): ${alpha.toFixed(2)}°`;
     document.getElementById("Yaxis").textContent = `Y (Beta): ${beta.toFixed(2)}°`;
     document.getElementById("Zaxis").textContent = `Z (Gamma): ${gamma.toFixed(2)}°`;
 }
 
-// Mock wind data (iOS does not provide this directly)
-function updateWind() {
-    // Simulate random wind data
-    const windSpeed = (Math.random() * 100).toFixed(1);
-    document.getElementById("wind").textContent = `Wind: ${windSpeed} km/h`;
+// Function to update motion data
+function updateMotionData(event) {
+    const acceleration = event.accelerationIncludingGravity;
+    if (acceleration) {
+        document.getElementById("Xaxis").textContent = `X: ${acceleration.x.toFixed(2)}`;
+        document.getElementById("Yaxis").textContent = `Y: ${acceleration.y.toFixed(2)}`;
+        document.getElementById("Zaxis").textContent = `Z: ${acceleration.z.toFixed(2)}`;
+    }
 }
 
-// Main function to request geolocation and set up orientation listeners
-function startTracking() {
-    // Request geolocation updates every 2 seconds
+// Start tracking on page load with permission prompt
+window.onload = () => {
+    requestMotionPermissions();
+    // Set geolocation updates every 2 seconds
+    setInterval(updateGeolocation, 2000);
+};
+
+// Geolocation function
+function updateGeolocation() {
     if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(updateLocation, errorHandler, {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 5000
-        });
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                const speed = position.coords.speed || 0;
+                document.getElementById("longitude").textContent = `Long: ${longitude.toFixed(3)}`;
+                document.getElementById("latitude").textContent = `Lat: ${latitude.toFixed(3)}`;
+                document.getElementById("speed").textContent = `${(speed * 3.6).toFixed(2)} km/h`;
+            },
+            (error) => {
+                console.error("Geolocation error:", error);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            }
+        );
     } else {
-        document.getElementById("longitude").textContent = "Geolocation not supported";
+        console.error("Geolocation not supported by this browser.");
     }
-
-    // Request orientation data updates
-    if (window.DeviceOrientationEvent) {
-        window.addEventListener("deviceorientation", updateOrientationData);
-    } else {
-        console.error("DeviceOrientationEvent is not supported on this device.");
-    }
-
-    // Set an interval to update mock wind data every 2 seconds
-    setInterval(updateWind, 2000);
 }
 
 // Start tracking on page load
