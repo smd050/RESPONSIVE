@@ -237,26 +237,33 @@ if (window.DeviceOrientationEvent) {
 
 
     //SOME MORE FUNCTIONS **************************************************************************************************************
-    // Function to request motion and orientation permissions
-async function requestMotionPermissions() {
-    if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        try {
-            const response = await DeviceMotionEvent.requestPermission();
-            if (response === 'granted') {
-                console.log("Device Motion permission granted.");
-                window.addEventListener("deviceorientation", updateOrientationData);
-                window.addEventListener("devicemotion", updateMotionData);
+    // Function to request permissions and start tracking
+function startTracking() {
+    // Check if permission is required (mainly for iOS); Android may skip this part
+    if (typeof DeviceMotionEvent.requestPermission === "function") {
+        DeviceMotionEvent.requestPermission().then((permissionState) => {
+            if (permissionState === "granted") {
+                initializeTracking();
             } else {
-                console.warn("Device Motion permission denied.");
+                console.warn("Permission to access motion and orientation denied.");
             }
-        } catch (error) {
-            console.error("Error requesting Device Motion permission:", error);
-        }
+        }).catch(console.error);
     } else {
-        // For browsers that don't require permission, just start listening
-        window.addEventListener("deviceorientation", updateOrientationData);
-        window.addEventListener("devicemotion", updateMotionData);
+        initializeTracking(); // Start immediately for Android and other platforms
     }
+}
+
+// Function to initialize tracking of all sensors
+function initializeTracking() {
+    // Start listening for orientation, motion events, and geolocation updates
+    window.addEventListener("deviceorientation", updateOrientationData);
+    window.addEventListener("devicemotion", updateMotionData);
+
+    // Set geolocation and wind updates every 100 milliseconds
+    setInterval(() => {
+        updateGeolocation();
+        updateWindData(); // Assuming a function for wind data
+    }, 100);
 }
 
 // Function to update orientation data
@@ -265,9 +272,9 @@ function updateOrientationData(event) {
     const beta = event.beta || 0;   // Rotation around x-axis
     const gamma = event.gamma || 0; // Rotation around y-axis
 
-    document.getElementById("Xaxis").textContent = `X (Alpha): ${alpha.toFixed(2)}°`;
-    document.getElementById("Yaxis").textContent = `Y (Beta): ${beta.toFixed(2)}°`;
-    document.getElementById("Zaxis").textContent = `Z (Gamma): ${gamma.toFixed(2)}°`;
+    document.getElementById("Xaxis").textContent = `X: ${alpha.toFixed(2)}°`;
+    document.getElementById("Yaxis").textContent = `Y: ${beta.toFixed(2)}°`;
+    document.getElementById("Zaxis").textContent = `Z: ${gamma.toFixed(2)}°`;
 }
 
 // Function to update motion data
@@ -280,14 +287,7 @@ function updateMotionData(event) {
     }
 }
 
-// Start tracking on page load with permission prompt
-window.onload = () => {
-    requestMotionPermissions();
-    // Set geolocation updates every 2 seconds
-    setInterval(updateGeolocation, 2000);
-};
-
-// Geolocation function
+// Function to update geolocation data
 function updateGeolocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -313,9 +313,16 @@ function updateGeolocation() {
     }
 }
 
+// Function to simulate or retrieve wind data (placeholder for real data source)
+function updateWindData() {
+    // Placeholder values for wind speed and direction, replace with real API or logic if available
+    const windSpeed = Math.random() * 10; // Random wind speed
+    const windDirection = Math.floor(Math.random() * 360); // Random wind direction in degrees
+    document.getElementById("wind").textContent = `Wind: ${windSpeed.toFixed(1)} m/s at ${windDirection}°`;
+}
+
 // Start tracking on page load
 window.onload = startTracking;
-
 
     
 
